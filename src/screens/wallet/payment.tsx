@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { FC, useState } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
-import PhonePePaymentSDK from 'react-native-phonepe-pg'
-import Toast from 'react-native-toast-message'
-import { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet'
-import { useQueryClient } from '@tanstack/react-query'
+import { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
+import { useQueryClient } from '@tanstack/react-query';
+import { FC, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import PhonePePaymentSDK from 'react-native-phonepe-pg';
+import Toast from 'react-native-toast-message';
 
-import { Button } from '@/components/reusables/ui/button'
-import { Text } from '@/components/reusables/ui/text'
-import { usePgCheckout } from '@/lib/apis/usePgCheckout'
-import { useAppStore } from '@/lib/store/useAppStore'
+import { Button } from '@/components/reusables/ui/button';
+import { Text } from '@/components/reusables/ui/text';
+import { usePgCheckout } from '@/lib/apis/usePgCheckout';
+import { useAppStore } from '@/lib/store/useAppStore';
 
 const styles = StyleSheet.create({
   input: {
@@ -17,104 +17,99 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     width: '80%',
-    color: '#000000'
+    color: '#000000',
   },
   scrollView: {
-    flexGrow: 1
-  }
-})
+    flexGrow: 1,
+  },
+});
 
 export const Payment: FC<{ close: () => void }> = ({ close }) => {
-  const [amount, setAmount] = useState<string>()
+  const [amount, setAmount] = useState<string>();
 
-  const queryClient = useQueryClient()
-  const { mutateAsync } = usePgCheckout()
-  const mobile = useAppStore(s => s.user?.mobile)
-  const customerId = useAppStore(s => s.user?._id)
+  const queryClient = useQueryClient();
+  const { mutateAsync } = usePgCheckout();
+  const mobile = useAppStore(s => s.user?.mobile);
+  const customerId = useAppStore(s => s.user?._id);
 
   const onAddMoney = () => {
-    if (!mobile) return
+    if (!mobile) return;
     if (!amount || Number.isNaN(Number(amount))) {
       Toast.show({
         text1: 'Invalid amount',
-        type: 'error'
-      })
-      return
+        type: 'error',
+      });
+      return;
     }
 
     // if (Number(amount) < 200) {
     if (Number(amount) < 1) {
       Toast.show({
         text1: 'minimum accepted amount is 200',
-        type: 'error'
-      })
-      return
+        type: 'error',
+      });
+      return;
     }
 
-    if (!customerId) return
+    if (!customerId) return;
 
     mutateAsync({ amount: Number(amount), customerId })
       .then(res => {
-        const { environment, checksum, merchant_id, payload_main } = res
-        const isDebuggingEnabled = environment === 'SANDBOX'
-        const appId = ''
+        const { environment, checksum, merchant_id, payload_main } = res;
+        const isDebuggingEnabled = environment === 'SANDBOX';
+        const appId = '';
 
         PhonePePaymentSDK.init(
           environment,
           merchant_id,
           appId,
-          isDebuggingEnabled
+          isDebuggingEnabled,
         )
           .then(() => {
-            PhonePePaymentSDK.startTransaction(
-              payload_main,
-              checksum,
-              null,
-              null
-            )
+            PhonePePaymentSDK.startTransaction(payload_main, checksum)
               .then(a => {
                 if (a.status === 'SUCCESS') {
                   void queryClient.refetchQueries({
-                    queryKey: ['wallet-details']
-                  })
+                    queryKey: ['wallet-details'],
+                  });
                   void queryClient.refetchQueries({
-                    queryKey: ['wallet-transactions']
-                  })
-                  Toast.show({ text1: 'Payment successful' })
-                  close()
+                    queryKey: ['wallet-transactions'],
+                  });
+                  Toast.show({ text1: 'Payment successful' });
+                  close();
                 } else {
-                  const errLen = a.error?.length || 0
+                  const errLen = a.error?.length || 0;
                   Toast.show({
                     text1: 'Payment failed',
                     text2: errLen > 80 ? 'Something went wrong' : a.error,
-                    type: 'error'
-                  })
+                    type: 'error',
+                  });
                 }
               })
               .catch(err =>
                 Toast.show({
                   text1: 'Payment failed',
                   text2: err.message,
-                  type: 'error'
-                })
-              )
+                  type: 'error',
+                }),
+              );
           })
           .catch(err =>
             Toast.show({
               text1: 'Payment failed',
               text2: err.message,
-              type: 'error'
-            })
-          )
+              type: 'error',
+            }),
+          );
       })
       .catch(err =>
         Toast.show({
           text1: 'Payment failed',
           text2: err.message,
-          type: 'error'
-        })
-      )
-  }
+          type: 'error',
+        }),
+      );
+  };
 
   return (
     <BottomSheetView className="px-4 flex-1 py-4 gap-y-3">
@@ -176,5 +171,5 @@ export const Payment: FC<{ close: () => void }> = ({ close }) => {
         <Text className="font-poppins font-semibold">PAY NOW</Text>
       </Button>
     </BottomSheetView>
-  )
-}
+  );
+};

@@ -10,6 +10,7 @@ import { Fragment, useCallback, useMemo, useRef } from 'react';
 import { Button } from '@/components/reusables/ui/button';
 import { Text } from '@/components/reusables/ui/text';
 import { useAppStore } from '@/lib/store/useAppStore';
+import { Payment } from '@/screens/wallet/payment';
 import { ApplicationStackParamList } from '@/types/navigation';
 
 export const AddMoneyButton = () => {
@@ -78,13 +79,12 @@ export const AddMoneyButton = () => {
         android_keyboardInputMode="adjustResize"
         backdropComponent={backdropComponent}
       >
-        <></>
-        {/* <Payment
+        <Payment
           close={() => {
-            bottomSheetModalRef.current?.close()
-            refreshWallet()
+            bottomSheetModalRef.current?.close();
+            refreshWallet();
           }}
-        /> */}
+        />
       </BottomSheetModal>
     </Fragment>
   );
