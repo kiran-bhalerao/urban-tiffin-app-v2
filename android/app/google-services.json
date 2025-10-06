@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "445077306015",
+    "project_id": "urban-tiffin-push-notifcn",
+    "storage_bucket": "urban-tiffin-push-notifcn.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445077306015:android:be44b31f66c824ed3cc0aa",
+        "android_client_info": {
+          "package_name": "com.urbantiffin.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_MefksjJcowBGMpbJ3oPZlzCkZdJNXu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
