@@ -1,16 +1,17 @@
 /* eslint-disable react-native/no-inline-styles */
-import { useRef } from 'react'
-import { Keyboard, ScrollView, StyleSheet, View } from 'react-native'
-import OTPTextView from 'react-native-otp-textinput'
-import Toast from 'react-native-toast-message'
+import { useRef } from 'react';
+import { Keyboard, StyleSheet, View } from 'react-native';
+import OTPTextView from 'react-native-otp-textinput';
+import Toast from 'react-native-toast-message';
 
-import { Brand } from '@/components/molecules/Brand'
-import { Button } from '@/components/reusables/ui/button'
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { useVerifyOtp } from '@/lib/apis/useVerifyOtp'
-import { useAppStore } from '@/lib/store/useAppStore'
-import type { ApplicationScreenProps } from '@/types/navigation'
+import { Brand } from '@/components/molecules/Brand';
+import { Button } from '@/components/reusables/ui/button';
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { useVerifyOtp } from '@/lib/apis/useVerifyOtp';
+import { useAppStore } from '@/lib/store/useAppStore';
+import type { ApplicationScreenProps } from '@/types/navigation';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const styles = StyleSheet.create({
   roundedTextInput: {
@@ -18,51 +19,51 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderBottomWidth: 1,
-    backgroundColor: '#ffffff'
-  }
-})
+    backgroundColor: '#ffffff',
+  },
+});
 
 export function OtpScreen({
   navigation,
-  route
+  route,
 }: ApplicationScreenProps<'Otp'>) {
-  const otpInput = useRef<OTPTextView | null>(null)
+  const otpInput = useRef<OTPTextView | null>(null);
 
-  const id = route.params?._id
-  const mobile = route.params?.mobile
-  const isSignup = route.params?.isSignup || false
+  const id = route.params?._id;
+  const mobile = route.params?.mobile;
+  const isSignup = route.params?.isSignup || false;
 
-  const { mutateAsync, isPending } = useVerifyOtp()
+  const { mutateAsync, isPending } = useVerifyOtp();
 
-  const setUser = useAppStore(s => s.setUser)
-  const setAccessToken = useAppStore(s => s.setAccessToken)
+  const setUser = useAppStore(s => s.setUser);
+  const setAccessToken = useAppStore(s => s.setAccessToken);
 
   const onSubmitPress = () => {
-    const otpStr = otpInput.current?.state.otpText.join('') || ''
+    const otpStr = otpInput.current?.state.otpText.join('') || '';
 
     if (otpStr.length < 4) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Please enter OTP'
-      })
+        text2: 'Please enter OTP',
+      });
 
-      return
+      return;
     }
 
-    const otp = Number(otpStr)
+    const otp = Number(otpStr);
     if (Number.isNaN(otp)) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Please enter valid OTP'
-      })
+        text2: 'Please enter valid OTP',
+      });
 
-      return
+      return;
     }
 
     if (isSignup) {
-      navigation.navigate('CreateProfile', { _id: id, mobile, otp })
+      navigation.navigate('CreateProfile', { _id: id, mobile, otp });
     } else {
       mutateAsync({ otp, mobile, _id: id })
         .then(({ message, data: { token, user } }) => {
@@ -70,29 +71,31 @@ export function OtpScreen({
           Toast.show({
             type: 'success',
             text1: 'Login Success',
-            text2: message
-          })
+            text2: message,
+          });
 
-          setAccessToken(token)
-          setUser(user)
+          setAccessToken(token);
+          setUser(user);
         })
         .catch((err: string) => {
           Toast.show({
             type: 'error',
             text1: 'Error',
-            text2: err
-          })
-        })
+            text2: err,
+          });
+        });
     }
-  }
+  };
 
   return (
     <SafeScreen>
-      <ScrollView
+      <KeyboardAwareScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flex: 1 }}
-        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        extraScrollHeight={20}
       >
         <View className="justify-center flex-1">
           <Brand className="mt-8" />
@@ -106,11 +109,11 @@ export function OtpScreen({
           </Text>
           <OTPTextView
             ref={e => {
-              otpInput.current = e
+              otpInput.current = e;
             }}
             handleTextChange={t => {
               if (t.length === 4) {
-                Keyboard.dismiss()
+                Keyboard.dismiss();
               }
             }}
             tintColor="#FFA922"
@@ -137,7 +140,7 @@ export function OtpScreen({
             <Text className="font-poppins">SUBMIT</Text>
           </Button>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeScreen>
-  )
+  );
 }

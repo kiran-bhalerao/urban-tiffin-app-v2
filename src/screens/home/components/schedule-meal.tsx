@@ -1,4 +1,6 @@
-import { FC, useMemo } from 'react'
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { Star, Store } from 'lucide-react-native';
+import { FC, useMemo } from 'react';
 import {
   Dimensions,
   Image,
@@ -6,31 +8,28 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  View
-} from 'react-native'
-import { NavigationProp, useNavigation } from '@react-navigation/native'
-import { Star, Store } from 'lucide-react-native'
+  View,
+} from 'react-native';
 
-import Banner from '@/assets/images/banner.png'
-import Dish from '@/assets/images/dish.jpeg'
-import { Button } from '@/components/reusables/ui/button'
-import { Text } from '@/components/reusables/ui/text'
-import { SearchKitchen, useSearchKitchen } from '@/lib/apis/useSearchKitchen'
-import { useGeolocation } from '@/lib/hooks/useGeolocation'
-import { useRefresh } from '@/lib/hooks/useRefresh'
-import { useAppStore } from '@/lib/store/useAppStore'
-import { LatestAlerts } from '@/screens/home/components/latest-alerts'
-import type { ApplicationStackParamList } from '@/types/navigation'
-import { cn } from '@/lib/utils'
+import Banner from '@/assets/images/banner.png';
+import Dish from '@/assets/images/dish.jpeg';
+import { Text } from '@/components/reusables/ui/text';
+import { SearchKitchen, useSearchKitchen } from '@/lib/apis/useSearchKitchen';
+import { useGeolocation } from '@/lib/hooks/useGeolocation';
+import { useRefresh } from '@/lib/hooks/useRefresh';
+import { useAppStore } from '@/lib/store/useAppStore';
+import { cn } from '@/lib/utils';
+import { LatestAlerts } from '@/screens/home/components/latest-alerts';
+import type { ApplicationStackParamList } from '@/types/navigation';
 
-const bannerWidth = Dimensions.get('screen').width - 30
+const bannerWidth = Dimensions.get('screen').width - 30;
 const styles = StyleSheet.create({
   image: {
     height: (bannerWidth * 598) / 760,
-    width: bannerWidth
+    width: bannerWidth,
   },
-  dish: { width: 75, height: 75 }
-})
+  dish: { width: 75, height: 75 },
+});
 
 const MenuRow: FC<SearchKitchen> = props => {
   const {
@@ -41,10 +40,10 @@ const MenuRow: FC<SearchKitchen> = props => {
     _id,
     fssai,
     kitchenManager,
-    description
-  } = props
+    description,
+  } = props;
   const { navigate } =
-    useNavigation<NavigationProp<ApplicationStackParamList>>()
+    useNavigation<NavigationProp<ApplicationStackParamList>>();
 
   return (
     <Pressable
@@ -59,7 +58,7 @@ const MenuRow: FC<SearchKitchen> = props => {
         source={
           images[0]
             ? {
-                uri: images[0]
+                uri: images[0],
               }
             : Dish
         }
@@ -90,41 +89,38 @@ const MenuRow: FC<SearchKitchen> = props => {
         </View>
       </View>
     </Pressable>
-  )
-}
+  );
+};
 
 export const ScheduleMeal = () => {
-  const { navigate } =
-    useNavigation<NavigationProp<ApplicationStackParamList>>()
-
-  const GeoLocation = useGeolocation()
+  const GeoLocation = useGeolocation();
   const UserLocation = useAppStore(s => {
-    const loc = s.user?.address?.find(a => a.isDefault)?.location
-    if (!loc) return undefined
+    const loc = s.user?.address?.find(a => a.isDefault)?.location;
+    if (!loc) return undefined;
 
     return {
       lat: loc.coordinates[0],
-      lng: loc.coordinates[1]
-    }
-  })
+      lng: loc.coordinates[1],
+    };
+  });
 
   const { data } = useSearchKitchen(
     {
       text: '',
-      location: UserLocation || GeoLocation
+      location: UserLocation || GeoLocation,
     },
-    5
-  )
-  const { refreshing, onRefresh } = useRefresh()
+    5,
+  );
+  const { refreshing, onRefresh } = useRefresh();
   const kitchens = useMemo(
     () => data?.pages.map(page => page.data.kitchens).flat() || [],
-    [data?.pages]
-  )
+    [data?.pages],
+  );
 
   return (
     <ScrollView
       contentContainerClassName={cn({
-        'flex-1': kitchens.length === 0
+        'flex-1': kitchens.length === 0,
       })}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -150,7 +146,7 @@ export const ScheduleMeal = () => {
           <View className="gap-2 flex-1">
             {kitchens.length > 0 ? (
               kitchens?.map(k => {
-                return <MenuRow key={k._id} {...k} />
+                return <MenuRow key={k._id} {...k} />;
               })
             ) : (
               <View className="flex-1 gap-3 items-center justify-center">
@@ -165,5 +161,5 @@ export const ScheduleMeal = () => {
         </View>
       </View>
     </ScrollView>
-  )
-}
+  );
+};

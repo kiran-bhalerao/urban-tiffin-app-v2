@@ -1,60 +1,60 @@
 /* eslint-disable react-native/no-inline-styles */
-import { useState } from 'react'
-import { Linking, Pressable, ScrollView, View } from 'react-native'
-import DateTimePickerModal from 'react-native-modal-datetime-picker'
-import RNPickerSelect from 'react-native-picker-select'
-import { ArrowLeft } from 'lucide-react-native'
-import * as yup from 'yup'
+import { ArrowLeft } from 'lucide-react-native';
+import { useState } from 'react';
+import { Linking, Modal, Pressable, ScrollView, View } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
+import * as yup from 'yup';
 
-import { Button } from '@/components/reusables/ui/button'
-import { Input } from '@/components/reusables/ui/input'
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { formateFullDate } from '@/lib/functions/formate_full_date'
-import type { ApplicationScreenProps } from '@/types/navigation'
+import { Button } from '@/components/reusables/ui/button';
+import { Input } from '@/components/reusables/ui/input';
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { formateFullDate } from '@/lib/functions/formate_full_date';
+import type { ApplicationScreenProps } from '@/types/navigation';
+import DateTimePicker, { useDefaultStyles } from 'react-native-ui-datepicker';
 
 const profileSchema = yup.object({
   fullName: yup.string().required('Please enter your full name'),
   email: yup
     .string()
     .required('Please enter your email address')
-    .email('Please enter valid email address')
-})
+    .email('Please enter valid email address'),
+});
 
 export function CreateProfileScreen({
   navigation,
-  route
+  route,
 }: ApplicationScreenProps<'CreateProfile'>) {
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [gender, setGender] = useState<string>()
-  const [date, setDate] = useState<Date>()
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [gender, setGender] = useState<string>();
+  const [date, setDate] = useState<Date>();
 
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { _id, mobile, otp } = route.params
+  const { _id, mobile, otp } = route.params;
 
   const validateProfile = (
     profile: yup.InferType<typeof profileSchema>,
-    cb?: () => void
+    cb?: () => void,
   ) => {
     profileSchema
       .validate(profile, { abortEarly: false })
       .then(() => {
-        setErrors({})
-        cb?.()
+        setErrors({});
+        cb?.();
       })
       .catch((err: { inner: { path: string; errors: string[] }[] }) => {
         const errors = err.inner.reduce(
           (acc, e) => ({ ...acc, [e.path]: e.errors[0] }),
-          {}
-        )
+          {},
+        );
 
-        setErrors(errors)
-      })
-  }
+        setErrors(errors);
+      });
+  };
 
   const onNextPress = () => {
     validateProfile({ email, fullName }, () => {
@@ -65,14 +65,16 @@ export function CreateProfileScreen({
         dob: date?.toString(),
         _id,
         mobile,
-        otp
-      })
-    })
-  }
+        otp,
+      });
+    });
+  };
 
   const onBlur = () => {
-    validateProfile({ email, fullName })
-  }
+    validateProfile({ email, fullName });
+  };
+
+  const defaultStyles = useDefaultStyles();
 
   return (
     <SafeScreen>
@@ -96,7 +98,7 @@ export function CreateProfileScreen({
             alignSelf: 'stretch',
             height: 'auto',
             flex: 1,
-            flexGrow: 1
+            flexGrow: 1,
           }}
         >
           <View className="py-2 gap-4">
@@ -142,17 +144,34 @@ export function CreateProfileScreen({
                   {date ? formateFullDate(date.toString()) : 'Choose a date'}
                 </Text>
               </Pressable>
-              <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                maximumDate={new Date()}
-                minimumDate={new Date(1950, 0, 1)}
-                onConfirm={date => {
-                  setDate(date)
-                  setDatePickerVisibility(false)
-                }}
-                onCancel={() => setDatePickerVisibility(false)}
-              />
+              <Modal
+                visible={isDatePickerVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setDatePickerVisibility(false)}
+              >
+                <Pressable
+                  className="flex-1 bg-black/50 justify-center items-center"
+                  onPress={() => setDatePickerVisibility(false)}
+                >
+                  <Pressable
+                    className="bg-white rounded-2xl p-5 mx-4 w-11/12"
+                    onPress={e => e.stopPropagation()}
+                  >
+                    <DateTimePicker
+                      mode="single"
+                      date={date}
+                      onChange={({ date }) => {
+                        if (date) {
+                          setDate(new Date(date?.toString()));
+                          setDatePickerVisibility(false);
+                        }
+                      }}
+                      styles={defaultStyles}
+                    />
+                  </Pressable>
+                </Pressable>
+              </Modal>
             </View>
             <View className="gap-1.5">
               <Text className="text-lg text-brand-text">Gender</Text>
@@ -165,11 +184,10 @@ export function CreateProfileScreen({
                     inputAndroid: {
                       fontSize: 16,
                       color: '#000',
-                      paddingVertical: 15,
                       paddingHorizontal: 16,
                       borderRadius: 10,
                       minWidth: '100%',
-                      backgroundColor: 'transparent'
+                      backgroundColor: 'transparent',
                     },
                     inputIOS: {
                       fontSize: 16,
@@ -178,14 +196,14 @@ export function CreateProfileScreen({
                       paddingHorizontal: 16,
                       borderRadius: 10,
                       minWidth: '100%',
-                      backgroundColor: '#fff'
-                    }
+                      backgroundColor: '#fff',
+                    },
                   }}
                   onValueChange={setGender}
                   items={[
                     { label: 'Male', value: 'male' },
                     { label: 'Female', value: 'female' },
-                    { label: 'other', value: 'other' }
+                    { label: 'other', value: 'other' },
                   ]}
                 />
               </View>
@@ -206,7 +224,7 @@ export function CreateProfileScreen({
                 variant="link"
                 size="lg"
                 onPress={() => {
-                  Linking.openURL('https://urbantiffin.in/').catch(() => {})
+                  Linking.openURL('https://urbantiffin.in/').catch(() => {});
                 }}
               >
                 <Text className="text-blue-500 underline font-light font-poppins">
@@ -227,5 +245,5 @@ export function CreateProfileScreen({
         </View>
       </View>
     </SafeScreen>
-  )
+  );
 }
