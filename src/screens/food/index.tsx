@@ -1,51 +1,50 @@
-import { FC, useContext, useEffect, useMemo, useState } from 'react'
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import Toast from 'react-native-toast-message'
-import { NavigationProp, useNavigation } from '@react-navigation/native'
-import { useQueryClient } from '@tanstack/react-query'
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ChevronsRight,
   Clock,
   Edit3,
   Hand,
   MoveRight,
-  Save
-} from 'lucide-react-native'
+  Save,
+} from 'lucide-react-native';
+import { FC, useContext, useEffect, useMemo, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { useCancelMealOrder } from '@/lib/apis/useCancelMealOrder'
-import { useModifyMealOrder } from '@/lib/apis/useModifyMealOrder'
-import { useGetCalendar } from '@/lib/apis/useGetCalenndar'
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { useCancelMealOrder } from '@/lib/apis/useCancelMealOrder';
+import { useGetCalendar } from '@/lib/apis/useGetCalenndar';
+import { useModifyMealOrder } from '@/lib/apis/useModifyMealOrder';
 import {
   ScheduledOrders,
-  useScheduledOrders
-} from '@/lib/apis/useScheduledOrders'
-import { isDatePassed } from '@/lib/functions/date_passed'
-import { formateFullDate } from '@/lib/functions/formate_full_date'
-import { useAppStore } from '@/lib/store/useAppStore'
-import { cn } from '@/lib/utils'
+  useScheduledOrders,
+} from '@/lib/apis/useScheduledOrders';
+import { formateFullDate } from '@/lib/functions/formate_full_date';
+import { useAppStore } from '@/lib/store/useAppStore';
+import { cn } from '@/lib/utils';
+import { MealBookingConfigManagerContext } from '@/providers/data-load';
 import type {
   ApplicationStackParamList,
-  ApplicationTabProps
-} from '@/types/navigation'
-import { MealBookingConfigManagerContext } from '@/providers/data-load'
+  ApplicationTabProps,
+} from '@/types/navigation';
 
 const styles = StyleSheet.create({
-  dish: { width: 55, height: 55 }
-})
+  dish: { width: 55, height: 55 },
+});
 
 interface MenuRowProps {
-  type: string
-  food: string
-  kitchenName: string
-  tag: string
-  count: number
-  image?: string
-  mealPreference: string
-  isEditing?: boolean
-  onQuantityChange?: (newQuantity: number) => void
-  mealId?: string
+  type: string;
+  food: string;
+  kitchenName: string;
+  tag: string;
+  count: number;
+  image?: string;
+  mealPreference: string;
+  isEditing?: boolean;
+  onQuantityChange?: (newQuantity: number) => void;
+  mealId?: string;
 }
 
 const MenuRow: FC<MenuRowProps> = props => {
@@ -57,19 +56,19 @@ const MenuRow: FC<MenuRowProps> = props => {
     mealPreference,
     isEditing,
     onQuantityChange,
-    mealId
-  } = props
-  const [localCount, setLocalCount] = useState(count)
+    mealId,
+  } = props;
+  const [localCount, setLocalCount] = useState(count);
 
   useEffect(() => {
-    setLocalCount(count)
-  }, [count])
+    setLocalCount(count);
+  }, [count]);
 
   const handleQuantityChange = (delta: number) => {
-    const newCount = Math.max(0, localCount + delta)
-    setLocalCount(newCount)
-    onQuantityChange?.(newCount)
-  }
+    const newCount = Math.max(0, localCount + delta);
+    setLocalCount(newCount);
+    onQuantityChange?.(newCount);
+  };
 
   return (
     <View className="flex-row relative items-center border border-gray-200 bg-white px-4 py-3.5 rounded-xl">
@@ -79,13 +78,13 @@ const MenuRow: FC<MenuRowProps> = props => {
             className={cn(
               'p-0.5 border border-red-600 flex justify-center items-center',
               {
-                'border-green-600': mealPreference.toLowerCase() === 'veg'
-              }
+                'border-green-600': mealPreference.toLowerCase() === 'veg',
+              },
             )}
           >
             <View
               className={cn('h-1.5 w-1.5 bg-red-600 rounded-full', {
-                'bg-green-600': mealPreference.toLowerCase() === 'veg'
+                'bg-green-600': mealPreference.toLowerCase() === 'veg',
               })}
             />
           </View>
@@ -130,130 +129,130 @@ const MenuRow: FC<MenuRowProps> = props => {
         </Text> */}
       </View>
     </View>
-  )
-}
+  );
+};
 
 export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
   const { navigate } =
-    useNavigation<NavigationProp<ApplicationStackParamList>>()
-  const { configManager } = useContext(MealBookingConfigManagerContext)
+    useNavigation<NavigationProp<ApplicationStackParamList>>();
+  const { configManager } = useContext(MealBookingConfigManagerContext);
 
   const [selectedDay, setSelectedDay] = useState<{
-    date: Date
-    formatted: string
-  }>()
-  const [editingDate, setEditingDate] = useState<string | null>(null)
+    date: Date;
+    formatted: string;
+  }>();
+  const [editingDate, setEditingDate] = useState<string | null>(null);
   const [modifiedQuantities, setModifiedQuantities] = useState<
     Record<string, number>
-  >({})
+  >({});
 
   // Check if current selected day is in editing mode
-  const isEditingMode = editingDate === selectedDay?.formatted
-  const { data } = useGetCalendar()
+  const isEditingMode = editingDate === selectedDay?.formatted;
+  const { data } = useGetCalendar();
 
   const dates = useMemo(() => {
     return (
       data?.data.map(d => {
-        const _date = new Date(d)
+        const _date = new Date(d);
         return {
           _date,
           day: _date.toLocaleDateString('en-US', { weekday: 'short' }),
           date: _date.toLocaleDateString('en-US', {
             day: 'numeric',
-            month: 'short'
+            month: 'short',
           }),
-          formatted: formateFullDate(d)
-        }
+          formatted: formateFullDate(d),
+        };
       }) || []
-    )
-  }, [data?.data])
+    );
+  }, [data?.data]);
 
   // Get detailed cancellation status for meals on the selected date
   const cancellationStatus = useMemo(() => {
-    if (!selectedDay?.date) return null
+    if (!selectedDay?.date) return null;
 
     // For now, we'll check breakfast as a general indicator
     // In a more sophisticated implementation, we could check specific meal types
     return configManager.getMealCancellationRestrictionStatus(
       selectedDay.date,
-      'breakfast'
-    )
-  }, [selectedDay?.date, configManager])
+      'breakfast',
+    );
+  }, [selectedDay?.date, configManager]);
 
   // set initial date
   useEffect(() => {
     if (dates[0]) {
-      setSelectedDay({ date: dates[0]._date, formatted: dates[0].formatted })
+      setSelectedDay({ date: dates[0]._date, formatted: dates[0].formatted });
     }
-  }, [dates])
+  }, [dates]);
 
-  const userId = useAppStore(s => s.user?._id)
+  const userId = useAppStore(s => s.user?._id);
   const { data: _orders } = useScheduledOrders(userId, {
     startDate: dates[0]?.formatted,
-    endDate: dates[dates.length - 1]?.formatted
-  })
+    endDate: dates[dates.length - 1]?.formatted,
+  });
 
   const orders = useMemo(() => {
     return (
       _orders?.data.customerOrders.reduce((acc, n) => {
-        const date = formateFullDate(n.date)
+        const date = formateFullDate(n.date);
         // Add customerOrderId to each order and merge with existing orders for the same date
         const ordersWithCustomerOrderId = n.orders.map(order => ({
           ...order,
-          customerOrderId: n._id
-        }))
+          customerOrderId: n._id,
+        }));
 
         return {
           ...acc,
           [date]: acc[date]
             ? [...acc[date], ...ordersWithCustomerOrderId]
-            : ordersWithCustomerOrderId
-        }
+            : ordersWithCustomerOrderId,
+        };
       }, {} as Record<string, (ScheduledOrders['orders'][0] & { customerOrderId: string })[] | undefined>) ||
       {}
-    )
-  }, [_orders?.data.customerOrders])
+    );
+  }, [_orders?.data.customerOrders]);
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   const { mutate } = useCancelMealOrder({
     onError(error) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: error
-      })
+        text2: error,
+      });
     },
     onSuccess({ message }) {
-      void queryClient.refetchQueries({ queryKey: ['scheduled-orders'] })
-      void queryClient.refetchQueries({ queryKey: ['upcoming-meals'] })
+      void queryClient.refetchQueries({ queryKey: ['scheduled-orders'] });
+      void queryClient.refetchQueries({ queryKey: ['upcoming-meals'] });
       Toast.show({
         type: 'success',
         text1: 'Meal Canceled',
-        text2: message
-      })
-    }
-  })
+        text2: message,
+      });
+    },
+  });
 
   const { mutate: modifyMeal } = useModifyMealOrder({
     onError(error) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: error
-      })
+        text2: error,
+      });
     },
     onSuccess({ message }) {
-      void queryClient.refetchQueries({ queryKey: ['scheduled-orders'] })
-      void queryClient.refetchQueries({ queryKey: ['upcoming-meals'] })
-      setEditingDate(null)
-      setModifiedQuantities({})
+      void queryClient.refetchQueries({ queryKey: ['scheduled-orders'] });
+      void queryClient.refetchQueries({ queryKey: ['upcoming-meals'] });
+      setEditingDate(null);
+      setModifiedQuantities({});
       Toast.show({
         type: 'success',
         text1: 'Meal Modified',
-        text2: message
-      })
-    }
-  })
+        text2: message,
+      });
+    },
+  });
 
   const onCancelMeal = (customerOrderIds: string[]) =>
     Alert.alert(
@@ -262,59 +261,59 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
       [
         {
           text: 'Cancel',
-          style: 'cancel'
+          style: 'cancel',
         },
         {
           text: 'OK',
           onPress: () => {
             if (userId) {
-              mutate({ orderBy: userId, orderIds: customerOrderIds })
+              mutate({ orderBy: userId, orderIds: customerOrderIds });
             }
-          }
-        }
-      ]
-    )
+          },
+        },
+      ],
+    );
 
   const handleQuantityChange = (mealId: string, newQuantity: number) => {
     setModifiedQuantities(prev => ({
       ...prev,
-      [mealId]: newQuantity
-    }))
-  }
+      [mealId]: newQuantity,
+    }));
+  };
 
   const onSaveModifications = () => {
-    if (!userId || !selectedDay) return
+    if (!userId || !selectedDay) return;
 
-    const dayOrders = orders[selectedDay.formatted]
-    if (!dayOrders?.length) return
+    const dayOrders = orders[selectedDay.formatted];
+    if (!dayOrders?.length) return;
 
     // Find meals that have been modified
     const modifiedMeals = Object.entries(modifiedQuantities)
       .map(([mealId, newQuantity]) => {
-        const originalOrder = dayOrders.find(order => order._id === mealId)
+        const originalOrder = dayOrders.find(order => order._id === mealId);
         if (!originalOrder || originalOrder.quantity === newQuantity)
-          return null
+          return null;
 
         return {
           mealId,
           count: newQuantity,
           customerOrderId: originalOrder.customerOrderId,
-          kitchenId: originalOrder.kitchen._id
-        }
+          kitchenId: originalOrder.kitchen._id,
+        };
       })
-      .filter((meal): meal is NonNullable<typeof meal> => meal !== null)
+      .filter((meal): meal is NonNullable<typeof meal> => meal !== null);
 
     if (modifiedMeals.length === 0) {
-      setEditingDate(null)
-      return
+      setEditingDate(null);
+      return;
     }
 
     // Convert to API format - flatten all meals into single array
     const update = modifiedMeals.map(meal => ({
       meal: meal.mealId,
       count: meal.count,
-      customerOrderId: meal.customerOrderId
-    }))
+      customerOrderId: meal.customerOrderId,
+    }));
 
     Alert.alert(
       'Save Changes',
@@ -324,35 +323,35 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
       [
         {
           text: 'Cancel',
-          style: 'cancel'
+          style: 'cancel',
         },
         {
           text: 'Save',
           onPress: () => {
             modifyMeal({
               orderBy: userId,
-              update
-            })
-          }
-        }
-      ]
-    )
-  }
+              update,
+            });
+          },
+        },
+      ],
+    );
+  };
 
   const onStartEditing = () => {
-    if (!selectedDay) return
+    if (!selectedDay) return;
 
-    setEditingDate(selectedDay.formatted)
+    setEditingDate(selectedDay.formatted);
     // Initialize modified quantities with current quantities
-    const currentQuantities: Record<string, number> = {}
+    const currentQuantities: Record<string, number> = {};
     orders[selectedDay.formatted]?.forEach(order => {
-      currentQuantities[order._id] = order.quantity || 1
-    })
-    setModifiedQuantities(currentQuantities)
-  }
+      currentQuantities[order._id] = order.quantity || 1;
+    });
+    setModifiedQuantities(currentQuantities);
+  };
 
   return (
-    <SafeScreen className="pb-0">
+    <SafeScreen className="pb-0" edges={['top']}>
       <View className="flex-1">
         <View className="gap-1 pt-1.5 pb-3.5">
           <Text className="text-[22px] font-medium font-poppins">
@@ -375,29 +374,29 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
                     className={cn(
                       'bg-white h-[60px] w-[72px] rounded-lg items-center px-0.5 py-3',
                       {
-                        'bg-brand': d.formatted === selectedDay?.formatted
-                      }
+                        'bg-brand': d.formatted === selectedDay?.formatted,
+                      },
                     )}
                   >
                     <Text
                       className={cn(
                         'text-[15px] text-brand-text font-poppins font-semibold',
                         {
-                          'text-white': d.formatted === selectedDay?.formatted
-                        }
+                          'text-white': d.formatted === selectedDay?.formatted,
+                        },
                       )}
                     >
                       {d.day}
                     </Text>
                     <Text
                       className={cn('font-poppins text-sm text-brand-text/60', {
-                        'text-white': d.formatted === selectedDay?.formatted
+                        'text-white': d.formatted === selectedDay?.formatted,
                       })}
                     >
                       {d.date}
                     </Text>
                   </Pressable>
-                )
+                );
               })}
             </View>
           </ScrollView>
@@ -424,7 +423,7 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
                           `${acc}${acc ? ' +' : ''} ${item.name} ${
                             Number(item.units) > 1 ? `(${item.units})` : ''
                           }`,
-                        ''
+                        '',
                       )
                       .trim()}
                     kitchenName={order.kitchen?.name || 'Kitchen name'}
@@ -434,7 +433,7 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
                     }
                     mealId={order._id}
                   />
-                )
+                );
               })}
             </View>
           ) : (
@@ -503,13 +502,13 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
             {!isEditingMode && (
               <Pressable
                 onPress={() => {
-                  const dayOrders = orders[selectedDay.formatted]
+                  const dayOrders = orders[selectedDay.formatted];
                   if (dayOrders && dayOrders.length > 0) {
                     // Get unique customer order IDs for the selected day
                     const uniqueCustomerOrderIds = [
-                      ...new Set(dayOrders.map(order => order.customerOrderId))
-                    ]
-                    onCancelMeal(uniqueCustomerOrderIds)
+                      ...new Set(dayOrders.map(order => order.customerOrderId)),
+                    ];
+                    onCancelMeal(uniqueCustomerOrderIds);
                   }
                 }}
                 className="flex-row gap-2 justify-between items-center bg-white px-5 py-5 rounded-xl border border-brand-red/20"
@@ -546,8 +545,8 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
         {isEditingMode && (
           <Pressable
             onPress={() => {
-              setEditingDate(null)
-              setModifiedQuantities({})
+              setEditingDate(null);
+              setModifiedQuantities({});
             }}
             className="flex-row gap-2 mb-2 justify-center items-center bg-gray-100 px-5 py-4 rounded-xl"
           >
@@ -558,5 +557,5 @@ export function FoodTab({ navigation }: ApplicationTabProps<'Wallet'>) {
         )}
       </View>
     </SafeScreen>
-  )
+  );
 }

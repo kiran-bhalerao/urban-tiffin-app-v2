@@ -1,31 +1,25 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetModalProvider
-} from '@gorhom/bottom-sheet'
 import {
   ArrowLeft,
   Check,
   CheckCheck,
   Info,
-  ShoppingCart
-} from 'lucide-react-native'
+  ShoppingCart,
+} from 'lucide-react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import Meal from '@/assets/images/meal.png'
-import { Button } from '@/components/reusables/ui/button'
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { isDatePassed } from '@/lib/functions/date_passed'
-import { useAppStore } from '@/lib/store/useAppStore'
-import { cn } from '@/lib/utils'
-import { MenuScrollView } from '@/screens/kitchen/components/menu-scrollview'
-import { useCartIntegration } from '@/screens/kitchen/useCartIntegration'
-import { useMealBookingManager } from '@/screens/kitchen/useMealBookingManager'
-import { useMeals } from '@/screens/kitchen/useMeals'
-import type { ApplicationScreenProps } from '@/types/navigation'
+import Meal from '@/assets/images/meal.png';
+import { Button } from '@/components/reusables/ui/button';
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { isDatePassed } from '@/lib/functions/date_passed';
+import { useAppStore } from '@/lib/store/useAppStore';
+import { cn } from '@/lib/utils';
+import { MenuScrollView } from '@/screens/kitchen/components/menu-scrollview';
+import { useCartIntegration } from '@/screens/kitchen/useCartIntegration';
+import { useMealBookingManager } from '@/screens/kitchen/useMealBookingManager';
+import { useMeals } from '@/screens/kitchen/useMeals';
+import type { ApplicationScreenProps } from '@/types/navigation';
 
 const styles = StyleSheet.create({
   img: { width: 55, height: 55 },
@@ -33,29 +27,29 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: 'center',
-    backgroundColor: 'grey'
+    backgroundColor: 'grey',
   },
   contentContainer: {
     flex: 1,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   week: {
     // height: 74
-  }
-})
+  },
+});
 
 export function KitchenScreen({
   navigation,
-  route
+  route,
 }: ApplicationScreenProps<'Kitchen'>) {
-  const { id, name, kitchenManager, scheduleDate } = route.params
+  const { id, name, kitchenManager, scheduleDate } = route.params;
 
-  const [tab, setTab] = useState<'lunch' | 'dinner'>('lunch')
-  const [activeDay, setActiveDay] = useState<string>()
-  const [initialActiveDayIndex, setInitialActiveDayIndex] = useState(0)
+  const [tab, setTab] = useState<'lunch' | 'dinner'>('lunch');
+  const [activeDay, setActiveDay] = useState<string>();
+  const [initialActiveDayIndex, setInitialActiveDayIndex] = useState(0);
 
-  const scrollViewRef = useRef<ScrollView>(null)
-  const accessToken = useAppStore(s => s.accessToken)
+  const scrollViewRef = useRef<ScrollView>(null);
+  const accessToken = useAppStore(s => s.accessToken);
 
   const {
     _meals,
@@ -65,35 +59,35 @@ export function KitchenScreen({
     getMealCount,
     mealScheduleIdForActiveDay,
     updateMealCount,
-    savedMeals
-  } = useMeals(id, activeDay, tab)
+    savedMeals,
+  } = useMeals(id, activeDay, tab);
 
   const {
     totalCartItems,
     selectedMealsCount,
     hasSelectedMeals,
     addMealsToCart,
-    goToCart
+    goToCart,
   } = useCartIntegration({
     kitchenId: id,
     mealScheduleId: mealScheduleIdForActiveDay,
     kitchenName: name,
-    savedMeals
-  })
+    savedMeals,
+  });
 
   const { isTomorrow, isBookingDisabled, restrictionMessage } =
     useMealBookingManager({
       activeDay,
-      tab
-    })
+      tab,
+    });
 
   const setInitialActiveDay = useCallback(() => {
-    const indexDate = dates.findIndex(d => isDatePassed(new Date(d), true))
+    const indexDate = dates.findIndex(d => isDatePassed(new Date(d), true));
     if (indexDate !== -1) {
-      setActiveDay(dates[indexDate])
-      setInitialActiveDayIndex(indexDate)
+      setActiveDay(dates[indexDate]);
+      setInitialActiveDayIndex(indexDate);
     }
-  }, [dates])
+  }, [dates]);
 
   // useEffect(() => {
   //   if (scheduleDate) {
@@ -114,27 +108,27 @@ export function KitchenScreen({
 
   useEffect(() => {
     if (dates[0]) {
-      setInitialActiveDay()
+      setInitialActiveDay();
     }
-  }, [dates, setInitialActiveDay])
+  }, [dates, setInitialActiveDay]);
 
   useEffect(() => {
     if (activeDay) {
-      setTab('lunch')
+      setTab('lunch');
     }
-  }, [activeDay])
+  }, [activeDay]);
 
   useEffect(() => {
     if (initialActiveDayIndex) {
       scrollViewRef.current?.scrollTo({
         x: 84 * initialActiveDayIndex,
-        animated: true
-      })
+        animated: true,
+      });
     }
-  }, [initialActiveDayIndex])
+  }, [initialActiveDayIndex]);
 
   return (
-    <SafeScreen className="px-0 py-0">
+    <SafeScreen className="px-0 pt-0 pb-4">
       <View className="flex-1 gap-2 px-4 py-4">
         <View className="flex-row items-start gap-3">
           <Button
@@ -178,7 +172,7 @@ export function KitchenScreen({
               navigation.navigate('KitchenDetails', {
                 id,
                 name,
-                kitchenManager
+                kitchenManager,
               })
             }
           >
@@ -197,10 +191,10 @@ export function KitchenScreen({
           >
             <View className="flex-row gap-2">
               {dates?.map((d, i) => {
-                const isActive = activeDay === d
-                const meals = selectedDays[d]
-                const hasBothMeal = meals?.dinner && meals?.lunch
-                const disabled = !isDatePassed(new Date(d), true)
+                const isActive = activeDay === d;
+                const meals = selectedDays[d];
+                const hasBothMeal = meals?.dinner && meals?.lunch;
+                const disabled = !isDatePassed(new Date(d), true);
 
                 return (
                   <Pressable
@@ -211,32 +205,32 @@ export function KitchenScreen({
                       'bg-white rounded-lg px-2.5 w-24 flex-1 items-center py-1.5',
                       {
                         'bg-brand': isActive,
-                        'opacity-60': disabled
-                      }
+                        'opacity-60': disabled,
+                      },
                     )}
                   >
                     <Text
                       className={cn(
                         'text-[15px] text-brand-text font-semibold font-poppins',
                         {
-                          'text-white': isActive
-                        }
+                          'text-white': isActive,
+                        },
                       )}
                       numberOfLines={1}
                     >
                       {new Date(d).toLocaleDateString('en-US', {
-                        weekday: 'short'
+                        weekday: 'short',
                       })}
                     </Text>
                     <Text
                       className={cn('text-sm text-brand-text font-poppins', {
-                        'text-white': isActive
+                        'text-white': isActive,
                       })}
                       numberOfLines={1}
                     >
                       {new Date(d).toLocaleDateString('en-US', {
                         day: 'numeric',
-                        month: 'short'
+                        month: 'short',
                       })}
                     </Text>
                     {Object.keys(selectedDays).includes(d) && (
@@ -244,8 +238,8 @@ export function KitchenScreen({
                         className={cn(
                           'bg-brand-violet mt-2 h-5 w-5 justify-center items-center rounded-full',
                           {
-                            'bg-white': isActive
-                          }
+                            'bg-white': isActive,
+                          },
                         )}
                       >
                         {hasBothMeal ? (
@@ -266,13 +260,13 @@ export function KitchenScreen({
                         className={cn(
                           'border-brand-violet border-dashed border mt-2 h-[16px] w-[16px] mb-1 justify-center items-center rounded-full',
                           {
-                            'border-white': isActive
-                          }
+                            'border-white': isActive,
+                          },
                         )}
                       />
                     )}
                   </Pressable>
-                )
+                );
               })}
             </View>
           </ScrollView>
@@ -282,7 +276,7 @@ export function KitchenScreen({
             <Pressable
               onPress={() => setTab('lunch')}
               className={cn('flex-1 py-3.5 border border-white rounded-full', {
-                'bg-brand/20 border-brand': tab === 'lunch'
+                'bg-brand/20 border-brand': tab === 'lunch',
               })}
             >
               <Text className="text-center font-poppins">Lunch</Text>
@@ -290,7 +284,7 @@ export function KitchenScreen({
             <Pressable
               onPress={() => setTab('dinner')}
               className={cn('flex-1 border border-white py-3.5 rounded-full', {
-                'bg-brand/20 border-brand': tab === 'dinner'
+                'bg-brand/20 border-brand': tab === 'dinner',
               })}
             >
               <Text className="text-center font-poppins">Dinner</Text>
@@ -336,16 +330,16 @@ export function KitchenScreen({
           </Button>
           <Button
             className={cn('flex-1 bg-brand rounded-xl', {
-              'bg-gray-400': !hasSelectedMeals || isBookingDisabled
+              'bg-gray-400': !hasSelectedMeals || isBookingDisabled,
             })}
             disabled={!!accessToken && (!hasSelectedMeals || isBookingDisabled)}
             onPress={() => {
               if (accessToken) {
                 if (!isBookingDisabled) {
-                  addMealsToCart()
+                  addMealsToCart();
                 }
               } else {
-                navigation.navigate('Login')
+                navigation.navigate('Login');
               }
             }}
           >
@@ -362,5 +356,5 @@ export function KitchenScreen({
         </View>
       </View>
     </SafeScreen>
-  )
+  );
 }

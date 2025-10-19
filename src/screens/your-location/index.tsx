@@ -1,4 +1,5 @@
-import { FC, useCallback, useEffect, useState } from 'react'
+import { ArrowLeft, LocateFixed, Search } from 'lucide-react-native';
+import { FC, useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Image,
@@ -6,35 +7,34 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  View
-} from 'react-native'
-import GetLocation from 'react-native-get-location'
-import { ArrowLeft, LocateFixed, Search } from 'lucide-react-native'
-import { useDebounceCallback } from 'usehooks-ts'
+  View,
+} from 'react-native';
+import GetLocation from 'react-native-get-location';
+import { useDebounceCallback } from 'usehooks-ts';
 
-import Meal from '@/assets/images/meal.png'
-import { Button } from '@/components/reusables/ui/button'
-import { Input } from '@/components/reusables/ui/input'
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { SearchAddress, useSearchAddress } from '@/lib/apis/useSearchAddress'
-import { cn } from '@/lib/utils'
-import type { ApplicationScreenProps } from '@/types/navigation'
+import Meal from '@/assets/images/meal.png';
+import { Button } from '@/components/reusables/ui/button';
+import { Input } from '@/components/reusables/ui/input';
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { SearchAddress, useSearchAddress } from '@/lib/apis/useSearchAddress';
+import { cn } from '@/lib/utils';
+import type { ApplicationScreenProps } from '@/types/navigation';
 
 const styles = StyleSheet.create({
-  img: { width: 85, height: 85 }
-})
+  img: { width: 85, height: 85 },
+});
 
 const AddressCard: FC<
   { active?: boolean; onPress: () => void } & SearchAddress
 > = props => {
-  const { active = false, onPress, description } = props
+  const { active = false, onPress, description } = props;
 
   return (
     <Pressable
       onPress={onPress}
       className={cn('bg-white rounded-xl px-5 pt-3 pb-4 border border-white', {
-        'border-brand': active
+        'border-brand': active,
       })}
     >
       <View className="flex flex-row my-2 items-center justify-between">
@@ -44,57 +44,57 @@ const AddressCard: FC<
       </View>
       <Text className="font-poppins text-brand-text">{description}</Text>
     </Pressable>
-  )
-}
+  );
+};
 
 export function YourLocationScreen({
   navigation,
-  route
+  route,
 }: ApplicationScreenProps<'YourLocation'>) {
-  const [location, setLocation] = useState<{ lat: number; lng: number }>()
+  const [location, setLocation] = useState<{ lat: number; lng: number }>();
   const getLocation = useCallback(() => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
-      timeout: 60000
+      timeout: 60000,
     })
       .then(location => {
-        setLocation({ lat: location.latitude, lng: location.longitude })
+        setLocation({ lat: location.latitude, lng: location.longitude });
       })
       .catch((error: { code: string; message: string }) => {
-        const { code } = error
+        const { code } = error;
         Alert.alert(
           code,
           'We need your location to provide nearby address suggestions. Please enable location access in your settings.',
           [
             {
               text: 'OPEN',
-              onPress: () => Linking.openSettings()
-            }
-          ]
-        )
-      })
-  }, [])
+              onPress: () => Linking.openSettings(),
+            },
+          ],
+        );
+      });
+  }, []);
 
   // get users current location on screen load
   useEffect(() => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
-      timeout: 60000
+      timeout: 60000,
     })
       .then(location => {
-        setLocation({ lat: location.latitude, lng: location.longitude })
+        setLocation({ lat: location.latitude, lng: location.longitude });
       })
-      .catch(() => undefined)
-  }, [])
+      .catch(() => undefined);
+  }, []);
 
-  const { mutate, data } = useSearchAddress()
+  const { mutate, data } = useSearchAddress();
   const debounced = useDebounceCallback((address: string) => {
-    mutate({ address, location })
-  }, 500)
+    mutate({ address, location });
+  }, 500);
 
   return (
     <SafeScreen>
-      <View className="flex-1 gap-2">
+      <View className="flex-1 gap-2 pb-8">
         <View className="flex-row items-center gap-3">
           <Button
             className="!px-0"
@@ -159,11 +159,11 @@ export function YourLocationScreen({
                           city: d.city,
                           rawAddress: d.description,
                           type: 'create_profile',
-                          profile_data: route.params
-                        })
+                          profile_data: route.params,
+                        });
                       }}
                     />
-                  )
+                  );
                 })}
               </View>
             </ScrollView>
@@ -171,5 +171,5 @@ export function YourLocationScreen({
         )}
       </View>
     </SafeScreen>
-  )
+  );
 }

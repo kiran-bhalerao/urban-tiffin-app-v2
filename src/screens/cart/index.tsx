@@ -1,53 +1,46 @@
-import React, { useCallback, useMemo } from 'react'
-import {
-  Alert,
-  FlatList,
-  Image,
-  Pressable,
-  ScrollView,
-  View
-} from 'react-native'
 import {
   ArrowLeft,
   Minus,
   Plus,
   ShoppingCart,
-  Trash2
-} from 'lucide-react-native'
-import Toast from 'react-native-toast-message'
+  Trash2,
+} from 'lucide-react-native';
+import React, { useCallback, useMemo } from 'react';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
-import { Button } from '@/components/reusables/ui/button'
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { useCartStore, type CartItem } from '@/lib/store/useCartStore'
-import { cn } from '@/lib/utils'
-import type { ApplicationScreenProps } from '@/types/navigation'
-import { useAppStore } from '@/lib/store/useAppStore'
-import { useQueryClient } from '@tanstack/react-query'
-import { useSaveMeal } from '@/lib/apis/useSaveMeal'
+import { Button } from '@/components/reusables/ui/button';
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { useSaveMeal } from '@/lib/apis/useSaveMeal';
+import { useAppStore } from '@/lib/store/useAppStore';
+import { useCartStore, type CartItem } from '@/lib/store/useCartStore';
+import { cn } from '@/lib/utils';
+import type { ApplicationScreenProps } from '@/types/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CartItemComponentProps {
-  item: CartItem
-  onUpdateQuantity: (itemId: string, quantity: number) => void
-  onRemove: (itemId: string) => void
+  item: CartItem;
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
+  onRemove: (itemId: string) => void;
 }
 
 const CartItemComponent: React.FC<CartItemComponentProps> = ({
   item,
   onUpdateQuantity,
-  onRemove
+  onRemove,
 }) => {
   const handleDecrease = () => {
     if (item.quantity > 1) {
-      onUpdateQuantity(item.id, item.quantity - 1)
+      onUpdateQuantity(item.id, item.quantity - 1);
     } else {
-      onRemove(item.id)
+      onRemove(item.id);
     }
-  }
+  };
 
   const handleIncrease = () => {
-    onUpdateQuantity(item.id, item.quantity + 1)
-  }
+    onUpdateQuantity(item.id, item.quantity + 1);
+  };
 
   const handleRemove = () => {
     Alert.alert(
@@ -58,11 +51,11 @@ const CartItemComponent: React.FC<CartItemComponentProps> = ({
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => onRemove(item.id)
-        }
-      ]
-    )
-  }
+          onPress: () => onRemove(item.id),
+        },
+      ],
+    );
+  };
 
   return (
     <View className="bg-white rounded-lg p-4 mb-2 shadow-sm border border-gray-100">
@@ -77,7 +70,7 @@ const CartItemComponent: React.FC<CartItemComponentProps> = ({
                 'px-2 py-1 rounded-full mr-2',
                 item.meal.mealPreference === 'VEG'
                   ? 'bg-green-100'
-                  : 'bg-red-100'
+                  : 'bg-red-100',
               )}
             >
               <Text
@@ -85,7 +78,7 @@ const CartItemComponent: React.FC<CartItemComponentProps> = ({
                   'text-xs font-semibold',
                   item.meal.mealPreference === 'VEG'
                     ? 'text-green-700'
-                    : 'text-red-700'
+                    : 'text-red-700',
                 )}
               >
                 {item.meal.mealPreference === 'VEG' ? 'VEG' : 'NON-VEG'}
@@ -107,7 +100,7 @@ const CartItemComponent: React.FC<CartItemComponentProps> = ({
             {new Date(item.date).toLocaleDateString('en-US', {
               weekday: 'short',
               month: 'short',
-              day: 'numeric'
+              day: 'numeric',
             })}
           </Text>
           <Text className="font-semibold text-lg text-gray-900">
@@ -119,9 +112,9 @@ const CartItemComponent: React.FC<CartItemComponentProps> = ({
           <Pressable
             onPress={() => {
               if (item.quantity === 1) {
-                handleRemove()
+                handleRemove();
               } else {
-                handleDecrease()
+                handleDecrease();
               }
             }}
             className="py-1.5 px-2 rounded-l-lg"
@@ -140,26 +133,26 @@ const CartItemComponent: React.FC<CartItemComponentProps> = ({
         </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
 interface KitchenSectionProps {
-  kitchenName: string
-  items: CartItem[]
-  onUpdateQuantity: (itemId: string, quantity: number) => void
-  onRemove: (itemId: string) => void
+  kitchenName: string;
+  items: CartItem[];
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
+  onRemove: (itemId: string) => void;
 }
 
 const KitchenSection: React.FC<KitchenSectionProps> = ({
   kitchenName,
   items,
   onUpdateQuantity,
-  onRemove
+  onRemove,
 }) => {
   const kitchenTotal = items.reduce(
     (total, item) => total + item.meal.price * item.quantity,
-    0
-  )
+    0,
+  );
 
   return (
     <View className="mb-2">
@@ -180,8 +173,8 @@ const KitchenSection: React.FC<KitchenSectionProps> = ({
         />
       ))}
     </View>
-  )
-}
+  );
+};
 
 export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
   const {
@@ -190,62 +183,62 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
     removeFromCart,
     clearCart,
     getCartTotal,
-    getCartItemCount
-  } = useCartStore()
-  const { user } = useAppStore()
-  const queryClient = useQueryClient()
+    getCartItemCount,
+  } = useCartStore();
+  const { user } = useAppStore();
+  const queryClient = useQueryClient();
 
   const itemsByKitchen = useMemo(() => {
     const grouped = items.reduce((acc, item) => {
       if (!acc[item.kitchenId]) {
         acc[item.kitchenId] = {
           kitchenName: item.kitchenName,
-          items: []
-        }
+          items: [],
+        };
       }
-      acc[item.kitchenId].items.push(item)
-      return acc
-    }, {} as Record<string, { kitchenName: string; items: CartItem[] }>)
+      acc[item.kitchenId].items.push(item);
+      return acc;
+    }, {} as Record<string, { kitchenName: string; items: CartItem[] }>);
 
     return Object.entries(grouped).map(([kitchenId, data]) => ({
       kitchenId,
-      ...data
-    }))
-  }, [items])
+      ...data,
+    }));
+  }, [items]);
 
-  const totalAmount = getCartTotal()
-  const totalItems = getCartItemCount()
+  const totalAmount = getCartTotal();
+  const totalItems = getCartItemCount();
 
   const { mutate: saveMeal, isPending: isScheduling } = useSaveMeal({
     onError(error) {
       Toast.show({
         type: 'error',
         text1: 'Scheduling Failed',
-        text2: error
-      })
+        text2: error,
+      });
     },
     onSuccess({ message }) {
       // Invalidate all relevant queries
-      void queryClient.refetchQueries({ queryKey: ['kitchens-meals'] })
-      void queryClient.refetchQueries({ queryKey: ['scheduled-orders'] })
-      void queryClient.refetchQueries({ queryKey: ['upcoming-meals'] })
-      void queryClient.refetchQueries({ queryKey: ['order-history'] })
-      void queryClient.refetchQueries({ queryKey: ['wallet-details'] })
-      void queryClient.refetchQueries({ queryKey: ['wallet-transactions'] })
+      void queryClient.refetchQueries({ queryKey: ['kitchens-meals'] });
+      void queryClient.refetchQueries({ queryKey: ['scheduled-orders'] });
+      void queryClient.refetchQueries({ queryKey: ['upcoming-meals'] });
+      void queryClient.refetchQueries({ queryKey: ['order-history'] });
+      void queryClient.refetchQueries({ queryKey: ['wallet-details'] });
+      void queryClient.refetchQueries({ queryKey: ['wallet-transactions'] });
 
       // Clear cart after successful scheduling
-      clearCart()
+      clearCart();
 
       Toast.show({
         type: 'success',
         text1: 'Meals Scheduled!',
-        text2: message || 'Your meals have been scheduled successfully'
-      })
+        text2: message || 'Your meals have been scheduled successfully',
+      });
 
       // Navigate to Food screen
-      navigation.navigate('Dashboard', { screen: 'Food' })
-    }
-  })
+      navigation.navigate('Dashboard', { screen: 'Food' });
+    },
+  });
 
   const ordersByKitchen = useMemo(() => {
     const grouped = items.reduce((acc, item) => {
@@ -254,24 +247,24 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
           kitchenId: item.kitchenId,
           mealScheduleId: item.mealScheduleId,
           kitchenName: item.kitchenName,
-          items: []
-        }
+          items: [],
+        };
       }
-      acc[item.kitchenId].items.push(item)
-      return acc
-    }, {} as Record<string, { kitchenId: string; mealScheduleId: string; kitchenName: string; items: CartItem[] }>)
+      acc[item.kitchenId].items.push(item);
+      return acc;
+    }, {} as Record<string, { kitchenId: string; mealScheduleId: string; kitchenName: string; items: CartItem[] }>);
 
-    return Object.values(grouped)
-  }, [items])
+    return Object.values(grouped);
+  }, [items]);
 
   const handleScheduleConfirm = useCallback(() => {
     if (!user?._id) {
       Toast.show({
         type: 'error',
         text1: 'Authentication Error',
-        text2: 'Please log in to schedule meals'
-      })
-      return
+        text2: 'Please log in to schedule meals',
+      });
+      return;
     }
 
     Alert.alert(
@@ -288,11 +281,11 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
                 // Group items by date for this kitchen
                 const ordersByDate = kitchenItems.reduce((acc, item) => {
                   if (!acc[item.date]) {
-                    acc[item.date] = []
+                    acc[item.date] = [];
                   }
-                  acc[item.date].push(item)
-                  return acc
-                }, {} as Record<string, CartItem[]>)
+                  acc[item.date].push(item);
+                  return acc;
+                }, {} as Record<string, CartItem[]>);
 
                 // Create orders array for this kitchen
                 const orders = Object.entries(ordersByDate).map(
@@ -302,45 +295,45 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
                     items: dateItems.map(item => ({
                       meal: item.mealId,
                       count: item.quantity,
-                      mealTime: item.meal.mealTime
+                      mealTime: item.meal.mealTime,
                     })),
-                    deliveryDate: date
-                  })
-                )
+                    deliveryDate: date,
+                  }),
+                );
 
-                return orders
-              }
-            )
+                return orders;
+              },
+            );
 
             saveMeal({
               orderBy: user._id,
-              addNew: { orders }
-            })
-          }
-        }
-      ]
-    )
+              addNew: { orders },
+            });
+          },
+        },
+      ],
+    );
   }, [
     user?._id,
     totalItems,
     items.length,
     totalAmount,
     ordersByKitchen,
-    saveMeal
-  ])
+    saveMeal,
+  ]);
 
   const handleScheduleAll = useCallback(() => {
     if (items.length === 0) {
       Toast.show({
         type: 'error',
         text1: 'Empty Cart',
-        text2: 'Please add some meals to your cart first'
-      })
-      return
+        text2: 'Please add some meals to your cart first',
+      });
+      return;
     }
 
-    handleScheduleConfirm()
-  }, [items.length, navigation])
+    handleScheduleConfirm();
+  }, [items.length, navigation]);
 
   const handleClearCart = useCallback(() => {
     Alert.alert(
@@ -352,17 +345,17 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
           text: 'Clear',
           style: 'destructive',
           onPress: () => {
-            clearCart()
+            clearCart();
             Toast.show({
               type: 'success',
               text1: 'Cart Cleared',
-              text2: 'All items have been removed from your cart'
-            })
-          }
-        }
-      ]
-    )
-  }, [clearCart])
+              text2: 'All items have been removed from your cart',
+            });
+          },
+        },
+      ],
+    );
+  }, [clearCart]);
 
   if (items.length === 0) {
     return (
@@ -397,7 +390,7 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
           </View>
         </View>
       </SafeScreen>
-    )
+    );
   }
 
   return (
@@ -450,5 +443,5 @@ export function CartScreen({ navigation }: ApplicationScreenProps<'Cart'>) {
         </Button>
       </View>
     </SafeScreen>
-  )
+  );
 }

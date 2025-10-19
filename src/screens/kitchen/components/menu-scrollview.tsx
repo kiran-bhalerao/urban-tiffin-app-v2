@@ -1,21 +1,21 @@
-import { FC, useEffect, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { FC, useEffect, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 
-import { Text } from '@/components/reusables/ui/text'
-import { cn } from '@/lib/utils'
-import { useCartStore } from '@/lib/store/useCartStore'
+import { Text } from '@/components/reusables/ui/text';
+import { useCartStore } from '@/lib/store/useCartStore';
+import { cn } from '@/lib/utils';
 
 interface MenuRowProps {
-  id: string
-  price: number
-  title: string
-  description: string
-  mealPreference: string
-  updateMealCount: (id: string, by?: number) => void
-  getMealCount: (id: string) => number
-  isBookingDisabled: boolean
-  activeDay: string
-  mealTime: string
+  id: string;
+  price: number;
+  title: string;
+  description: string;
+  mealPreference: string;
+  updateMealCount: (id: string, by?: number) => void;
+  getMealCount: (id: string) => number;
+  isBookingDisabled: boolean;
+  activeDay: string;
+  mealTime: string;
 }
 
 const MenuRow: FC<MenuRowProps> = ({
@@ -28,42 +28,42 @@ const MenuRow: FC<MenuRowProps> = ({
   mealPreference,
   isBookingDisabled,
   activeDay,
-  mealTime
+  mealTime,
 }) => {
-  const [count, setCount] = useState(0)
-  const { getItemQuantity } = useCartStore()
+  const [count, setCount] = useState(0);
+  const { getItemQuantity } = useCartStore();
 
   // Get cart quantity for this specific meal
-  const cartQuantity = getItemQuantity(id, activeDay, mealTime)
+  const cartQuantity = getItemQuantity(id, activeDay, mealTime);
 
   useEffect(() => {
-    setCount(getMealCount(id))
-  }, [getMealCount, id])
+    setCount(getMealCount(id));
+  }, [getMealCount, id]);
 
   return (
     <View
       className={cn('rounded-xl', {
-        'bg-blue-800/70': cartQuantity > 0
+        'bg-blue-800/70 rounded-xl': cartQuantity > 0,
       })}
     >
       <View
         className={cn(
           'flex-row relative items-center border z-30 border-neutral-200 bg-white pl-4 pr-2.5 py-3 rounded-xl',
           {
-            'border-blue-800/70': cartQuantity > 0
-          }
+            'border-blue-800/70': cartQuantity > 0,
+          },
         )}
       >
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <View
               className={cn('p-0.5 border border-red-600', {
-                'border-green-600': mealPreference.toLowerCase() === 'veg'
+                'border-green-600': mealPreference.toLowerCase() === 'veg',
               })}
             >
               <View
                 className={cn('h-1.5 w-1.5 bg-red-600 rounded-full', {
-                  'bg-green-600': mealPreference.toLowerCase() === 'veg'
+                  'bg-green-600': mealPreference.toLowerCase() === 'veg',
                 })}
               />
             </View>
@@ -86,8 +86,8 @@ const MenuRow: FC<MenuRowProps> = ({
                     className="px-2.5 py-1"
                     disabled={count === 0}
                     onPress={() => {
-                      updateMealCount(id, -1)
-                      setCount(getMealCount(id))
+                      updateMealCount(id, -1);
+                      setCount(getMealCount(id));
                     }}
                   >
                     <Text className="text-white font-semibold text-lg">-</Text>
@@ -100,17 +100,17 @@ const MenuRow: FC<MenuRowProps> = ({
               <Pressable
                 className={cn('px-2.5 py-1 rounded-lg', {
                   'py-1.5': count === 0,
-                  'bg-gray-400': isBookingDisabled
+                  'bg-gray-400': isBookingDisabled,
                 })}
                 disabled={isBookingDisabled}
                 onPress={() => {
-                  updateMealCount(id)
-                  setCount(getMealCount(id))
+                  updateMealCount(id);
+                  setCount(getMealCount(id));
                 }}
               >
                 <Text
                   className={cn('text-white font-semibold text-lg', {
-                    'text-base': count === 0
+                    'text-base': count === 0,
                   })}
                 >
                   {count === 0 ? 'Add' : '+'}
@@ -131,25 +131,25 @@ const MenuRow: FC<MenuRowProps> = ({
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
 interface IMenu {
-  id: string
-  title: string
-  price: number
-  orderCount: number
-  mealPreference: string
-  description: string
+  id: string;
+  title: string;
+  price: number;
+  orderCount: number;
+  mealPreference: string;
+  description: string;
 }
 
 interface MenuScrollViewProps {
-  meals: IMenu[]
-  updateMealCount: (id: string, by?: number) => void
-  getMealCount: (id: string) => number
-  isBookingDisabled: boolean
-  activeDay: string
-  mealTime: string
+  meals: IMenu[];
+  updateMealCount: (id: string, by?: number) => void;
+  getMealCount: (id: string) => number;
+  isBookingDisabled: boolean;
+  activeDay: string;
+  mealTime: string;
 }
 
 export const MenuScrollView: FC<MenuScrollViewProps> = props => {
@@ -159,8 +159,8 @@ export const MenuScrollView: FC<MenuScrollViewProps> = props => {
     getMealCount,
     isBookingDisabled,
     activeDay,
-    mealTime
-  } = props
+    mealTime,
+  } = props;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -180,9 +180,9 @@ export const MenuScrollView: FC<MenuScrollViewProps> = props => {
               activeDay={activeDay}
               mealTime={mealTime}
             />
-          )
+          );
         })}
       </View>
     </ScrollView>
-  )
-}
+  );
+};
