@@ -1,49 +1,49 @@
-import { useMemo } from 'react'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Image,
   RefreshControl,
   StyleSheet,
-  View
-} from 'react-native'
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
+  View,
+} from 'react-native';
 
-import WalletAsset from '@/assets/images/wallet.png'
-import { Text } from '@/components/reusables/ui/text'
-import { SafeScreen } from '@/components/template'
-import { useWalletDetails } from '@/lib/apis/useWalletDetails'
-import { useWalletTransaction } from '@/lib/apis/useWalletTransactions'
-import { formateFullDate } from '@/lib/functions/formate_full_date'
-import { useRefresh } from '@/lib/hooks/useRefresh'
-import { useAppStore } from '@/lib/store/useAppStore'
-import { AddMoneyButton } from '@/screens/wallet/add-button'
-import { WithdrawMoneyButton } from '@/screens/wallet/withdraw-button'
-import type { ApplicationTabProps } from '@/types/navigation'
-import { cn } from '@/lib/utils'
+import WalletAsset from '@/assets/images/wallet.png';
+import { Text } from '@/components/reusables/ui/text';
+import { SafeScreen } from '@/components/template';
+import { useWalletDetails } from '@/lib/apis/useWalletDetails';
+import { useWalletTransaction } from '@/lib/apis/useWalletTransactions';
+import { formateFullDate } from '@/lib/functions/formate_full_date';
+import { useRefresh } from '@/lib/hooks/useRefresh';
+import { useAppStore } from '@/lib/store/useAppStore';
+import { cn } from '@/lib/utils';
+import { AddMoneyButton } from '@/screens/wallet/add-button';
+import { WithdrawMoneyButton } from '@/screens/wallet/withdraw-button';
+import type { ApplicationTabProps } from '@/types/navigation';
 
 const styles = StyleSheet.create({
   image: {
     height: 120,
-    width: 120
+    width: 120,
   },
-  gap: { gap: 15, paddingBottom: 4 }
-})
+  gap: { gap: 15, paddingBottom: 4 },
+});
 
 export function WalletTab({ navigation }: ApplicationTabProps<'Wallet'>) {
-  const userId = useAppStore(s => s.user?._id)
-  const { data } = useWalletDetails(userId)
+  const userId = useAppStore(s => s.user?._id);
+  const { data } = useWalletDetails(userId);
 
   const {
     data: txData,
     isFetching,
-    fetchNextPage
-  } = useWalletTransaction(userId)
+    fetchNextPage,
+  } = useWalletTransaction(userId);
 
   const transactions = useMemo(
     () => txData?.pages.map(page => page.data.transactions).flat() || [],
-    [txData?.pages]
-  )
+    [txData?.pages],
+  );
 
   const ListLoader = useMemo(() => {
     if (isFetching) {
@@ -51,16 +51,16 @@ export function WalletTab({ navigation }: ApplicationTabProps<'Wallet'>) {
         <View className="py-6">
           <ActivityIndicator size="large" />
         </View>
-      )
+      );
     }
 
-    return null
-  }, [isFetching])
+    return null;
+  }, [isFetching]);
 
-  const { refreshing, onRefresh } = useRefresh()
+  const { refreshing, onRefresh } = useRefresh();
 
   return (
-    <SafeScreen className="pb-0">
+    <SafeScreen className="pb-0" edges={['top']}>
       <BottomSheetModalProvider>
         <View className="gap-1 pt-1.5 pb-3.5">
           <Text className="text-[22px] font-medium font-poppins">Wallet</Text>
@@ -91,8 +91,8 @@ export function WalletTab({ navigation }: ApplicationTabProps<'Wallet'>) {
             data={transactions}
             renderItem={({ item }) => {
               const isNegative = ['meal_charge'].includes(
-                item.transactionType.toLowerCase()
-              )
+                item.transactionType.toLowerCase(),
+              );
 
               return (
                 <View key={item._id} className="gap-2">
@@ -104,8 +104,8 @@ export function WalletTab({ navigation }: ApplicationTabProps<'Wallet'>) {
                       className={cn(
                         'text-brand-green font-semibold font-poppins',
                         {
-                          'text-brand-red': isNegative
-                        }
+                          'text-brand-red': isNegative,
+                        },
                       )}
                     >
                       {isNegative ? '-' : '+'}₹
@@ -133,7 +133,7 @@ export function WalletTab({ navigation }: ApplicationTabProps<'Wallet'>) {
                     </View>
                   </View>
                 </View>
-              )
+              );
             }}
             keyExtractor={(_, index) => index.toString()}
             contentContainerStyle={styles.gap}
@@ -145,5 +145,5 @@ export function WalletTab({ navigation }: ApplicationTabProps<'Wallet'>) {
         </View>
       </BottomSheetModalProvider>
     </SafeScreen>
-  )
+  );
 }

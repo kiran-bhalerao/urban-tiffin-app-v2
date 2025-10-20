@@ -3,17 +3,15 @@ import { MutateOptions, useMutation } from '@tanstack/react-query'
 import { axios, IApiError, IApiResponse } from '@/lib/axios'
 
 interface WalletWithdrawParams {
-  amount: number
   userId: string
 }
 
 type WalletWithdrawData = { wallet?: any }
 
-async function withdraw({ amount, userId }: WalletWithdrawParams) {
+async function withdraw({ userId }: WalletWithdrawParams) {
   const endpoint = '/payments/wallets/withdraw'
   const res = await axios.post<IApiResponse<WalletWithdrawData>>(endpoint, {
     customerId: userId,
-    amount,
     withdrawSource: 'upi'
   })
 

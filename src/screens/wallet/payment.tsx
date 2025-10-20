@@ -163,11 +163,7 @@ export const Payment: FC<{ close: () => void }> = ({ close }) => {
           </Button>
         </View>
       </ScrollView>
-      <Button
-        onPress={onAddMoney}
-        className="bg-brand rounded-xl mt-auto"
-        size="sm"
-      >
+      <Button onPress={onAddMoney} className="bg-brand rounded-xl mt-auto">
         <Text className="font-poppins font-semibold">PAY NOW</Text>
       </Button>
     </BottomSheetView>
